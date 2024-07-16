@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>திருக்குறள் கற்றல் விளையாட்டுகள்</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #1e90ff;
+            text-align: center;
+        }
+        .game-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #e6f3ff;
+            border-radius: 8px;
+        }
+        .word-container, .blank-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .word, .blank {
+            padding: 10px;
+            background-color: #4caf50;
+            color: white;
+            border-radius: 5px;
+            cursor: move;
+            user-select: none;
+        }
+        .blank {
+            background-color: #ddd;
+            min-width: 80px;
+            min-height: 20px;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #1e90ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0066cc;
+        }
+        #message, #meaning-message, #fillBlanksMessage, #matchMessage, #spellingMessage, #mcqMessage, #trueFalseMessage {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: gold;
+            color: #333;
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 5px;
+        }
+        #nameInput {
+            display: block;
+            margin: 20px auto;
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+        }
+        .match-item {
+            margin-bottom: 10px;
+        }
+        .match-item select {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>திருக்குறள் கற்றல் விளையாட்டுகள்</h1>
+        
+        <input type="text" id="nameInput" placeholder="உங்கள் பெயரை உள்ளிடவும்">
+        
+        <div class="game-section">
+            <h2>செயல்பாடு 1: திருக்குறளை நிரல்படுத்துக</h2>
+            <div id="word-container" class="word-container"></div>
+            <div id="blank-container" class="blank-container"></div>
+            <button onclick="checkAnswer()">சரிபார்க்கவும்</button>
+            <div id="message"></div>
+        </div>
+        
+        <div class="game-section">
+            <h2>செயல்பாடு 2: பொருளை நிரல்படுத்துக</h2>
+            <div id="meaning-word-container" class="word-container"></div>
+            <div id="meaning-blank-container" class="blank-container"></div>
+            <button onclick="checkMeaningAnswer()">சரிபார்க்கவும்</button>
+            <div id="meaning-message"></div>
+        </div>
+        
+        <div class="game-section">
+            <h2>செயல்பாடு 3: கோடிட்ட இடங்களை நிரப்புக</h2>
+            <p id="fillBlanks"></p>
+            <button onclick="checkFillBlanks()">சரிபார்க்கவும்</button>
+            <div id="fillBlanksMessage"></div>
+        </div>
+        
+        <div class="game-section">
+            <h2>செயல்பாடு 4: சொற்களுக்கான பொருளைப் பொருத்துக</h2>
+            <div id="matchGame"></div>
+            <button onclick="checkWordMatch()">சரிபார்க்கவும்</button>
+            <div id="matchMessage"></div>
+        </div>
+        
+        <div class="game-section">
+            <h2>செயல்பாடு 5: எழுத்துப் பிழைகளைத் திருத்துக</h2>
+            <div id="spellingGame"></div>
+            <button onclick="checkSpelling()">சரிபார்க்கவும்</button>
+            <div id="spellingMessage"></div>
+        </div>
+        
+        <div class="game-section">
+            <h2>செயல்பாடு 6: பல்தேர்வு வினாக்கள்</h2>
+            <div id="mcqGame"></div>
+            <button onclick="checkMCQ()">சரிபார்க்கவும்</button>
+            <div id="mcqMessage"></div>
+        </div>
+        
+        <div class="game-section">
+            <h2>செயல்பாடு 7: சரியா தவறா</h2>
+            <div id="trueFalseGame"></div>
+            <button onclick="checkTrueFalse()">சரிபார்க்கவும்</button>
+            <div id="trueFalseMessage"></div>
+        </div>
+        
+        <div id="badges"></div>
+        
+        <button onclick="generatePrintableVersion()">திருக்குறளையும் அதன் பொருளையும் அச்சிடக்கூடிய வடிவில் பெறுக</button>
+    </div>
+
+    <script>
+        const thirukkural = "செல்வத்துள் செல்வம் செவிச்செல்வம் அச்செல்வம் செல்வத்துள் எல்லாம் தலை";
+        const meaning = "ஒருவர் அடையத்தகுந்த செல்வங்களுள் சிறந்த செல்வம் செவிவழி பெறும் அறிவுச்செல்வமாகும். அவ்வறிவுச் செல்வம் மற்றச் செல்வங்களைவிடச் சிறந்ததாகக் கருதப்படுகின்றது.";
+        const words = thirukkural.split(' ');
+        const meaningWords = meaning.split(' ');
+        let badges = [];
+
+        // Activity 1: Arrange the Thirukkural
+        function initActivity1() {
+            const wordContainer = document.getElementById('word-container');
+            const blankContainer = document.getElementById('blank-container');
+            
+            let shuffledWords = [...words].sort(() => Math.random() - 0.5);
+            
+            shuffledWords.forEach((word, index) => {
+                const wordElement = document.createElement('div');
+                wordElement.className = 'word';
+                wordElement.textContent = word;
+                wordElement.draggable = true;
+                wordElement.addEventListener('dragstart', drag);
+                wordContainer.appendChild(wordElement);
+
+                const blankElement = document.createElement('div');
+                blankElement.className = 'blank';
+                blankElement.dataset.index = index;
+                blankElement.addEventListener('dragover', allowDrop);
+                blankElement.addEventListener('drop', drop);
+                blankContainer.appendChild(blankElement);
+            });
+        }
+
+        function drag(event) {
+            event.dataTransfer.setData("text", event.target.textContent);
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            const data = event.dataTransfer.getData("text");
+            event.target.textContent = data;
+        }
+
+        function checkAnswer() {
+            const blanks = document.querySelectorAll('#blank-container .blank');
+            let userAnswer = Array.from(blanks).map(blank => blank.textContent).join(' ');
+            if (userAnswer === thirukkural) {
+                document.getElementById('message').textContent = "சரியாக உள்ளது! நன்று செய்தீர்கள்!";
+                addBadge("திருக்குறள் வல்லுனர்");
+            } else {
+                document.getElementById('message').textContent = "சரியாக இல்லை. மீண்டும் முயற்சிக்கவும்!";
+            }
+        }
+
+        // Activity 2: Arrange the Meaning
+        function initActivity2() {
+            const wordContainer = document.getElementById('meaning-word-container');
+            const blankContainer = document.getElementById('meaning-blank-container');
+            
+            let shuffledMeaningWords = [...meaningWords].sort(() => Math.random() - 0.5);
+            
+            shuffledMeaningWords.forEach((word, index) => {
+                const wordElement = document.createElement('div');
+                wordElement.className = 'word';
+                wordElement.textContent = word;
+                wordElement.draggable = true;
+                wordElement.addEventListener('dragstart', drag);
+                wordContainer.appendChild(wordElement);
+
+                const blankElement = document.createElement('div');
+                blankElement.className = 'blank';
+                blankElement.dataset.index = index;
+                blankElement.addEventListener('dragover', allowDrop);
+                blankElement.addEventListener('drop', drop);
+                blankContainer.appendChild(blankElement);
+            });
+        }
+
+        function checkMeaningAnswer() {
+            const blanks = document.querySelectorAll('#meaning-blank-container .blank');
+            let userAnswer = Array.from(blanks).map(blank => blank.textContent).join(' ');
+            if (userAnswer === meaning) {
+                document.getElementById('meaning-message').textContent = "சரியாக உள்ளது! நன்று செய்தீர்கள்!";
+                addBadge("பொருள் வல்லுனர்");
+            } else {
+                document.getElementById('meaning-message').textContent = "சரியாக இல்லை. மீண்டும் முயற்சிக்கவும்!";
+            }
+        }
+
+        // Activity 3: Fill in the Blanks
+        function initActivity3() {
+            let fillBlanksText = thirukkural.replace(/செல்வம்/g, '_____');
+            document.getElementById('fillBlanks').textContent = fillBlanksText;
+        }
+
+        function checkFillBlanks() {
+            let userInput = prompt("விடுபட்ட சொல்லை உள்ளிடவும்:");
+            if (userInput.trim() === 'செல்வம்') {
+                document.getElementById('fillBlanksMessage').textContent = "சரியாக உள்ளது!";
+                addBadge("சொல் வல்லுனர்");
+            } else {
+                document.getElementById('fillBlanksMessage').textContent = "மீண்டும் முயற்சிக்கவும்!";
+            }
+        }
+
+        // Activity 4: Word Meaning Match
+        function initActivity4() {
+            const matchGame = document.getElementById('matchGame');
+            const wordMeanings = {
+                'செல்வம்': 'சொத்து',
+                'செவி': 'காது',
+                'தலை': 'முதன்மை'
+            };
+            const shuffledMeanings = Object.values(wordMeanings).sort(() => Math.random() - 0.5);
+            
+            for (let word in wordMeanings) {
+                let matchElement = document.createElement('div');
+                matchElement.className = 'match-item';
+                matchElement.innerHTML = `${word}: <select data-word="${word}">
+                    <option value="">பொருளைத் தேர்ந்தெடுக்கவும்</option>
+                    ${shuffledMeanings.map(meaning => `<option value="${meaning}">${meaning}</option>`).join('')}
+                </select>`;
+                matchGame.appendChild(matchElement);
+            }
+        }
+
+        function checkWordMatch() {
+            const selects = document.querySelectorAll('#matchGame select');
+            const correctMeanings = {
+                'செல்வம்': 'சொத்து',
+                'செவி': 'காது',
+                'தலை': 'முதன்மை'
+            };
+            let allCorrect = true;
+            selects.forEach(select => {
+                if (select.value !== correctMeanings[select.dataset.word]) {
+                    allCorrect = false;
+                }
+            });
+            if (allCorrect) {
+                document.getElementById('matchMessage').textContent = "அனைத்தும் சரியாக உள்ளன!";
+                addBadge("பொருள் பொருத்துநர்");
+            } else {
+                document.getElementById('matchMessage').textContent = "சில விடைகள் தவறாக உள்ளன. மீண்டும் முயற்சிக்கவும்!";
+            }
+        }
+
+        // Activity 5: Correct Spelling Mistakes
+        function initActivity5() {
+            const spellingGame = document.getElementById('spellingGame');
+            const words = ['செல்வத்துள்', 'செல்வம்', 'செவிச்செல்வம்', 'அச்செல்வம்', 'எல்லாம்', 'தலை'];
+            const misspelledWords = ['சல்வத்துள்', 'செல்வம்', 'செவிச்சல்வம்', 'அச்செல்வம்', 'எல்லாம்', 'தலை'];
+            
+            misspelledWords.forEach((word, index) => {
+                let wordElement = document.createElement('div');
+                wordElement.innerHTML = `${word} <input type="text" data-correct="${words[index]}">`;
+                spellingGame.appendChild(wordElement);
+            });
+        }
+
+        function checkSpelling() {
+            const inputs = document.querySelectorAll('#spellingGame input');
+            let allCorrect = true;
+            inputs.forEach(input => {
+                if (input.value !== input.dataset.correct) {
+                    allCorrect = false;
+                }
+            });
+            if (allCorrect) {
+                document.getElementById('spellingMessage').textContent = "அனைத்து எழுத்துக்களும் சரியாக உள்ளன!";
+                addBadge("எழுத்து வல்லுநர்");
+            } else {
+                document.getElementById('spellingMessage').textContent = "சில எழுத்துக்கள் தவறாக உள்ளன. மீண்டும் முயற்சிக்கவும்!";
+            }
+        }
+
+        // Activity 6: Multiple Choice Questions
+        function initActivity6() {
+            const mcqGame = document.getElementById('mcqGame');
+            const questions = [
+                {
+                    question: "இந்த திருக்குறளின்படி, எது மிகவும் மதிப்புமிக்க செல்வம்?",
+                    options: ["பணம்", "தங்கம்", "கேட்டறிவதன் மூலம் பெறும் அறிவு", "புகழ்"],
+                    answer: 2
+                },
+                {
+                    question: "'செவிச்செல்வம்' என்பதன் பொருள் என்ன?",
+                    options: ["கண் செல்வம்", "காது செல்வம்", "வாய் செல்வம்", "கை செல்வம்"],
+                    answer: 1
+                }
+            ];
+            
+            questions.forEach((q, index) => {
+                let questionElement = document.createElement('div');
+                questionElement.innerHTML = `
+                    <p>${index + 1}. ${q.question}</p>
+                    ${q.options.map((option, i) => `
+                        <input type="radio" name="q${index}" value="${i}" id="q${index}o${i}">
+                        <label for="q${index}o${i}">${option}</label><br>
+                    `).join('')}
+                `;
+                mcqGame.appendChild(questionElement);
+            });
+        }
+
+        function checkMCQ() {
+            const questions = document.querySelectorAll('#mcqGame > div');
+            let score = 0;
+            questions.forEach((q, index) => {
+                const selectedOption = q.querySelector(`input[name="q${index}"]:checked`);
+                if (selectedOption && parseInt(selectedOption.value) === [2, 1][index]) {
+                    score++;
+                }
+            });
+            if (score === questions.length) {
+                document.getElementById('mcqMessage').textContent = "அனைத்து விடைகளும் சரியானவை!";
+                addBadge("வினாடி வினா வெற்றியாளர்");
+            } else {
+                document.getElementById('mcqMessage').textContent = `நீங்கள் ${questions.length}ல் ${score} சரியாகப் பதிலளித்துள்ளீர்கள். மீண்டும் முயற்சிக்கவும்!`;
+            }
+        }
+
+        // Activity 7: True or False
+        function initActivity7() {
+            const trueFalseGame = document.getElementById('trueFalseGame');
+            const statements = [
+                {
+                    statement: "இந்தத் திருக்குறளின்படி, கேட்டறிவதன் மூலம் பெறும் செல்வமே மிகவும் மதிப்புமிக்கது.",
+                    answer: true
+                },
+                {
+                    statement: "இந்தத் திருக்குறள் பொருள் செல்வம் அறிவுச் செல்வத்தை விட முக்கியமானது என்கிறது.",
+                    answer: false
+                },
+                {
+                    statement: "இந்தத் திருக்குறளில் 'செவி' என்ற சொல் காதைக் குறிக்கிறது.",
+                    answer: true
+                }
+            ];
+            
+            statements.forEach((s, index) => {
+                let statementElement = document.createElement('div');
+                statementElement.innerHTML = `
+                    <p>${index + 1}. ${s.statement}</p>
+                    <input type="radio" name="tf${index}" value="true" id="tf${index}t"> <label for="tf${index}t">சரி</label>
+                    <input type="radio" name="tf${index}" value="false" id="tf${index}f"> <label for="tf${index}f">தவறு</label>
+                `;
+                trueFalseGame.appendChild(statementElement);
+            });
+        }
+
+        function checkTrueFalse() {
+            const statements = document.querySelectorAll('#trueFalseGame > div');
+            let score = 0;
+            statements.forEach((s, index) => {
+                const selectedOption = s.querySelector(`input[name="tf${index}"]:checked`);
+                if (selectedOption && (selectedOption.value === "true") === [true, false, true][index]) {
+                    score++;
+                }
+            });
+            if (score === statements.length) {
+                document.getElementById('trueFalseMessage').textContent = "அனைத்து விடைகளும் சரியானவை!";
+                addBadge("சரி தவறு சாம்பியன்");
+            } else {
+                document.getElementById('trueFalseMessage').textContent = `நீங்கள் ${statements.length}ல் ${score} சரியாகப் பதிலளித்துள்ளீர்கள். மீண்டும் முயற்சிக்கவும்!`;
+            }
+        }
+
+        function addBadge(badgeName) {
+            if (!badges.includes(badgeName)) {
+                badges.push(badgeName);
+                const badgesContainer = document.getElementById('badges');
+                const badge = document.createElement('span');
+                badge.className = 'badge';
+                badge.textContent = badgeName;
+                badgesContainer.appendChild(badge);
+            }
+        }
+
+        function generatePrintableVersion() {
+            const studentName = document.getElementById('nameInput').value || 'மாணவர்';
+            const printWindow = window.open('', '_blank');
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="ta">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>திருக்குறள் கற்றல் தாள் - ${studentName}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
+                        h1, h2 { color: #1e90ff; }
+                        .section { margin-bottom: 20px; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                    </style>
+                </head>
+                <body>
+                    <h1>திருக்குறள் கற்றல் தாள்</h1>
+                    <p><strong>மாணவர் பெயர்:</strong> ${studentName}</p>
+                    
+                    <div class="section">
+                        <h2>திருக்குறள்</h2>
+                        <p>${thirukkural}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>பொருள்</h2>
+                        <p>${meaning}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>செயல்பாடு 1: திருக்குறளை நிரல்படுத்துக</h2>
+                        <p>கீழ்க்கண்ட சொற்களை சரியான வரிசையில் எழுதவும்:</p>
+                        <p>${words.join(', ')}</p>
+                        <table>
+                            ${words.map((_, i) => `<tr><td>${i + 1}</td><td></td></tr>`).join('')}
+                        </table>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>செயல்பாடு 2: பொருளை நிரல்படுத்துக</h2>
+                        <p>கீழ்க்கண்ட சொற்களை சரியான வரிசையில் எழுதவும்:</p>
+                        <p>${meaningWords.join(', ')}</p>
+                        <table>
+                            ${meaningWords.map((_, i) => `<tr><td>${i + 1}</td><td></td></tr>`).join('')}
+                        </table>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>செயல்பாடு 3: கோடிட்ட இடங்களை நிரப்புக</h2>
+                        <p>${thirukkural.replace(/செல்வம்/g, '_____')}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>செயல்பாடு 4: சொற்களுக்கான பொருளைத் பொருத்துக</h2>
+                        <table>
+                            <tr><th>சொல்</th><th>பொருள்</th></tr>
+                            <tr><td>செல்வம்</td><td></td></tr>
+                            <tr><td>செவி</td><td></td></tr>
+                            <tr><td>தலை</td><td></td></tr>
+                        </table>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>செயல்பாடு 5: எழுத்துப் பிழைகளைத் திருத்துக</h2>
+                        <table>
+                            <tr><th>தவறான சொல்</th><th>சரியான சொல்</th></tr>
+                            <tr><td>சல்வத்துள்</td><td></td></tr>
+                            <tr><td>செவிச்சல்வம்</td><td></td></tr>
+                        </table>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>செயல்பாடு 6: பல்தேர்வு வினாக்கள்</h2>
+                        <p>1. இந்த திருக்குறளின்படி, எது மிகவும் மதிப்புமிக்க செல்வம்?</p>
+                        <p>a) பணம் b) தங்கம் c) கேட்டறிவதன் மூலம் பெறும் அறிவு d) புகழ்</p>
+                        <p>2. 'செவிச்செல்வம்' என்பதன் பொருள் என்ன?</p>
+                        <p>a) கண் செல்வம் b) காது செல்வம் c) வாய் செல்வம் d) கை செல்வம்</p>
+                    </div>
+                    
+                    <div class="section">
+                        <h2>செயல்பாடு 7: சரியா தவறா</h2>
+                        <p>1. இந்தத் திருக்குறளின்படி, கேட்டறிவதன் மூலம் பெறும் செல்வமே மிகவும் மதிப்புமிக்கது. (சரி/தவறு)</p>
+                        <p>2. இந்தத் திருக்குறள் பொருள் செல்வம் அறிவுச் செல்வத்தை விட முக்கியமானது என்கிறது. (சரி/தவறு)</p>
+                        <p>3. இந்தத் திருக்குறளில் 'செவி' என்ற சொல் காதைக் குறிக்கிறது. (சரி/தவறு)</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            printWindow.focus();
+            
+            // You can uncomment the next line to automatically open the print dialog
+            // printWindow.print();
+        }
+
+        window.onload = function() {
+            initActivity1();
+            initActivity2();
+            initActivity3();
+            initActivity4();
+            initActivity5();
+            initActivity6();
+            initActivity7();
+        }
+    </script>
+</body>
+</html>
